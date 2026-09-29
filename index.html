@@ -6,7 +6,7 @@
     <title>SKILL STANIS - Network Dashboard</title>
     <style>
         body { 
-            background-color: #030a16; 
+            background-color: #030a16; /* Deep Server Blue */
             color: #a0aec0; 
             font-family: 'Consolas', 'Segoe UI', monospace; 
             margin: 0; 
@@ -18,6 +18,8 @@
         
         /* Canvas Background Interaktif */
         #network-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; }
+        
+        /* Efek Vignette agar tengah lebih terang dan pinggir gelap */
         .overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, #030a16 90%); z-index: -1; pointer-events: none; }
         
         /* Bagian Atas (Header) */
@@ -37,11 +39,12 @@
         .main-area { flex: 1; display: flex; flex-direction: column; padding: 0 50px; overflow-y: auto; position: relative; z-index: 1; scrollbar-width: none; }
         .main-area::-webkit-scrollbar { display: none; }
         
+        /* Zona */
         .zone { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 20px; padding: 20px 0; }
         .zone-title { width: 100%; text-align: center; font-size: 14px; letter-spacing: 5px; color: #00ff88; margin-bottom: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.3); font-family: 'Segoe UI', sans-serif;}
 
         /* Kapsul Skill */
-        .capsule { padding: 12px 22px; border-radius: 8px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.3s ease; user-select: none; background: rgba(10, 15, 30, 0.9); border: 1px solid #1e293b; backdrop-filter: blur(5px); border-left: 3px solid #475569; }
+        .capsule { padding: 12px 22px; border-radius: 8px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); user-select: none; background: rgba(10, 15, 30, 0.9); border: 1px solid #1e293b; backdrop-filter: blur(5px); border-left: 3px solid #475569; }
         .capsule:hover { border-color: #00e5ff; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.4); border-left: 3px solid #00e5ff; }
         .capsule-info { display: flex; flex-direction: column; gap: 5px; font-family: 'Segoe UI', sans-serif; flex: 1; }
         .capsule .name { font-size: 14px; font-weight: bold; color: #e2e8f0; transition: 0.3s; }
@@ -49,10 +52,12 @@
         .capsule .close-btn { background: rgba(255,255,255,0.05); border: none; color: #64748b; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 12px; transition: 0.2s; }
         .capsule .close-btn:hover { background: #ff3366; color: white; box-shadow: 0 0 10px rgba(255,51,102,0.5); }
 
+        /* Mode Goals / Mastered */
         .capsule.mastered { border-color: #00ff88; background: rgba(0, 255, 136, 0.05); border-left: 3px solid #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.1); animation: float 4s ease-in-out infinite; }
         .capsule.mastered .name { color: #00ff88; text-shadow: 0 0 5px rgba(0,255,136,0.3); }
         .capsule.mastered .tag { color: #00e5ff; }
         .capsule.mastered .close-btn { color: #00ff88; }
+        .capsule.mastered:hover { box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
 
         @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
 
@@ -63,8 +68,9 @@
         .footer input:focus { border-color: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.15); }
         .footer select { background: #0a0f1e; border: 1px solid #1e293b; color: white; padding: 12px 20px; border-radius: 6px; outline: none; cursor: pointer; font-family: 'Segoe UI', sans-serif;}
         .footer button { background: #00e5ff; border: none; color: #030a16; padding: 12px 35px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+        .footer button:hover { background: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.4); }
 
-        /* TWEAKS UNTUK MOBILE (HP) */
+        /* TWEAKS KHUSUS AGAR RAPI DI HP (TIDAK MENGUBAH BACKGROUND) */
         @media (max-width: 768px) {
             .header { flex-direction: column; padding: 15px; gap: 15px; align-items: stretch; }
             .title-box { border-left: none; border-bottom: 3px solid #00ff88; border-radius: 12px 12px 0 0; text-align: center; padding: 15px; }
@@ -75,9 +81,8 @@
             .capsule { width: 100%; box-sizing: border-box; justify-content: space-between; }
             
             .footer { flex-direction: column; padding: 15px; gap: 10px; }
-            .footer input { width: 100%; box-sizing: border-box; }
-            .footer select { width: 100%; box-sizing: border-box; }
-            .footer button { width: 100%; box-sizing: border-box; padding: 15px; }
+            .footer input, .footer select, .footer button { width: 100%; box-sizing: border-box; }
+            .footer button { padding: 15px; }
         }
     </style>
 </head>
@@ -103,12 +108,13 @@
         <div class="zone" id="mastery-zone">
             <div class="zone-title">[ STANIS GOALS ]</div>
         </div>
+        
         <div class="zone" id="learning-zone" style="margin-top: auto; padding-bottom: 20px;">
         </div>
     </div>
 
     <div class="footer">
-        <input type="text" id="skill-input" placeholder="> Add new network protocol...">
+        <input type="text" id="skill-input" placeholder="> Add new network node or protocol...">
         <select id="skill-type">
             <option value="hard">Hard Skill</option>
             <option value="soft">Soft Skill</option>
@@ -117,7 +123,7 @@
     </div>
 
     <script>
-        /* BACKGROUND INTERAKTIF */
+        /* === BACKGROUND INTERAKTIF (VERSI ORIGINAL YANG LU SUKA) === */
         const canvas = document.getElementById('network-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -127,14 +133,15 @@
         function resizeCanvas() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            initNodes(); // Refresh jumlah node kalau layar berubah (rotasi HP)
+            initNodes();
         }
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        // Support sentuhan jari di HP (Touch events)
+        // Input Mouse (Laptop)
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
         window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+        
+        // Input Touch (HP) supaya latar belakangnya juga ngerespons jari
         window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
         window.addEventListener('touchend', () => { mouse.x = null; mouse.y = null; });
 
@@ -160,14 +167,15 @@
             }
         }
 
+        // Kepadatan titik (node) kembali 100% seperti versi awal
         function initNodes() {
             nodes = [];
-            // Disesuaikan agar di HP titiknya nggak terlalu penuh
-            let numberOfNodes = (width * height) / (width < 768 ? 15000 : 12000); 
+            let numberOfNodes = (width * height) / 12000; 
             for (let i = 0; i < numberOfNodes; i++) {
                 nodes.push(new NetworkNode());
             }
         }
+        resizeCanvas();
 
         function animateNetwork() {
             ctx.clearRect(0, 0, width, height);
@@ -191,20 +199,22 @@
                     }
                 }
 
+                // Efek kursor (Mouse/Jari) kembali ke radius 180 (lebih responsif)
                 if (mouse.x != null) {
                     let mdx = nodes[i].x - mouse.x;
                     let mdy = nodes[i].y - mouse.y;
                     let mDistance = Math.sqrt(mdx * mdx + mdy * mdy);
                     
-                    if (mDistance < 150) {
+                    if (mDistance < 180) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 255, 136, ${0.4 - mDistance/375})`;
+                        ctx.strokeStyle = `rgba(0, 255, 136, ${0.4 - mDistance/450})`;
                         ctx.lineWidth = 1.2;
                         ctx.moveTo(nodes[i].x, nodes[i].y);
                         ctx.lineTo(mouse.x, mouse.y);
                         ctx.stroke();
-                        nodes[i].x -= mdx * 0.01;
-                        nodes[i].y -= mdy * 0.01;
+                        
+                        nodes[i].x -= mdx * 0.005;
+                        nodes[i].y -= mdy * 0.005;
                     }
                 }
             }
@@ -213,8 +223,9 @@
         animateNetwork();
 
 
-        /* LOGIKA SKILL TRACKER */
-        let skills = JSON.parse(localStorage.getItem('stanis_network_v5')) || [
+        /* === LOGIKA SKILL TRACKER === */
+        // Mengganti nama key local storage biar aman dari sisa memori versi lama
+        let skills = JSON.parse(localStorage.getItem('stanis_network_v6')) || [
             { id: 1, name: 'TCP/IP & Subnetting', type: 'hard', mastered: false },
             { id: 2, name: 'Routing (OSPF, BGP)', type: 'hard', mastered: false },
             { id: 3, name: 'Switching (VLAN)', type: 'hard', mastered: false },
@@ -227,7 +238,7 @@
             { id: 10, name: 'Time Management', type: 'soft', mastered: false }
         ];
 
-        function saveSkills() { localStorage.setItem('stanis_network_v5', JSON.stringify(skills)); }
+        function saveSkills() { localStorage.setItem('stanis_network_v6', JSON.stringify(skills)); }
 
         function renderSkills() {
             const learningZone = document.getElementById('learning-zone');
@@ -263,21 +274,34 @@
 
         function toggleSkill(id) {
             const skill = skills.find(s => s.id === id);
-            if (skill) { skill.mastered = !skill.mastered; saveSkills(); renderSkills(); }
+            if (skill) {
+                skill.mastered = !skill.mastered;
+                saveSkills();
+                renderSkills();
+            }
         }
 
         function deleteSkill(id, event) {
             event.stopPropagation();
             skills = skills.filter(s => s.id !== id);
-            saveSkills(); renderSkills();
+            saveSkills();
+            renderSkills();
         }
 
         function addSkill() {
             const input = document.getElementById('skill-input');
             const type = document.getElementById('skill-type');
             if (input.value.trim() === '') return;
-            skills.push({ id: Date.now(), name: input.value.trim(), type: type.value, mastered: false });
-            saveSkills(); input.value = ''; renderSkills();
+
+            skills.push({
+                id: Date.now(),
+                name: input.value.trim(),
+                type: type.value,
+                mastered: false
+            });
+            saveSkills();
+            input.value = '';
+            renderSkills();
         }
 
         function updateProgress(mastered, total) {
@@ -285,7 +309,8 @@
             const text = document.getElementById('progress-text');
             if (total === 0) {
                 ring.style.background = `conic-gradient(#1a202c 100%, #1a202c 0%)`;
-                text.innerText = '0%'; return;
+                text.innerText = '0%';
+                return;
             }
             const percentage = Math.round((mastered / total) * 100);
             ring.style.background = `conic-gradient(#00e5ff ${percentage}%, #1a202c ${percentage}%)`;
